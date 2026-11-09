@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="30 seconds">
+
+    <springProperty scope="context" name="appName" source="spring.application.name" defaultValue="storex-backend"/>
+    
+    <property name="DISCORD_URL" value="${DISCORD_WEBHOOK_URL:-https://discord.com/api/webhooks/1234567890/your_discord_token}"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %highlight(%-5level) %cyan(%logger{36}) - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+    <appender name="DISCORD" class="com.storex.logging.DiscordAppender">
+        <webhookUrl>${DISCORD_URL}</webhookUrl>
+        
+        <username>AlertBot-DevOps</username>
+        <avatarUrl>https://cdn-icons-png.flaticon.com/512/564/564619.png</avatarUrl>
+        <applicationName>${appName}</applicationName>
+        
+        <alertColor>15158332</alertColor>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+    </appender>
+    <appender name="ASYNC_DISCORD" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="DISCORD" />
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <neverBlock>true</neverBlock>
+        <maxFlushTime>5000</maxFlushTime>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="ASYNC_DISCORD" />
+    </root>
+
+</configuration>
